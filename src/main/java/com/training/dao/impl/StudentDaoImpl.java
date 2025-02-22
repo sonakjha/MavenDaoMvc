@@ -31,10 +31,10 @@ public class StudentDaoImpl implements StudentDao {
                         mobileNo BIGINT,
                         gender CHAR(1),
                         gradPerc FLOAT,
-                        salary DOUBLE,
-                        isMember BOOLEAN,
+                        fee DOUBLE,
+                        isMember TINYINT(1),
                         dob DATE,
-                        joining DATETIME
+                        joinedAt DATETIME
                     );
                     """);
             System.out.println("Students table is ready.");
@@ -45,7 +45,7 @@ public class StudentDaoImpl implements StudentDao {
 
     @Override
     public long addStudent(Student student) {
-        String sql = "INSERT INTO Students (name, mobileNo, gender, gradPerc, salary, isMember, dob, joining) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Students (name, mobileNo, gender, gradPerc, fee, isMember, dob, joinedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection con = ConnectionFactory.getMySqlConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -53,10 +53,10 @@ public class StudentDaoImpl implements StudentDao {
             ps.setLong(2, student.getMobileNo());
             ps.setString(3, String.valueOf(student.getGender()));
             ps.setFloat(4, student.getGradPerc());
-            ps.setDouble(5, student.getSalary());
+            ps.setDouble(5, student.getFee());
             ps.setBoolean(6, student.isMember());
             ps.setDate(7, Date.valueOf(student.getDob()));
-            ps.setTimestamp(8, Timestamp.valueOf(student.getJoining()));
+            ps.setTimestamp(8, Timestamp.valueOf(student.getJoinedAt()));
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
@@ -68,12 +68,12 @@ public class StudentDaoImpl implements StudentDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // Indicates failure
+        return -1;
     }
 
     @Override
     public long updateStudent(Student student) {
-        String sql = "UPDATE Students SET name=?, mobileNo=?, gender=?, gradPerc=?, salary=?, isMember=?, dob=?, joining=? WHERE id=?";
+        String sql = "UPDATE Students SET name=?, mobileNo=?, gender=?, gradPerc=?, fee=?, isMember=?, dob=?, joinedAt=? WHERE id=?";
         try (Connection con = ConnectionFactory.getMySqlConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -81,10 +81,10 @@ public class StudentDaoImpl implements StudentDao {
             ps.setLong(2, student.getMobileNo());
             ps.setString(3, String.valueOf(student.getGender()));
             ps.setFloat(4, student.getGradPerc());
-            ps.setDouble(5, student.getSalary());
+            ps.setDouble(5, student.getFee());
             ps.setBoolean(6, student.isMember());
             ps.setDate(7, Date.valueOf(student.getDob()));
-            ps.setTimestamp(8, Timestamp.valueOf(student.getJoining()));
+            ps.setTimestamp(8, Timestamp.valueOf(student.getJoinedAt()));
             ps.setLong(9, student.getId());
 
             int affectedRows = ps.executeUpdate();
@@ -110,10 +110,10 @@ public class StudentDaoImpl implements StudentDao {
                         rs.getLong("mobileNo"),
                         rs.getString("gender").charAt(0),
                         rs.getFloat("gradPerc"),
-                        rs.getDouble("salary"),
+                        rs.getDouble("fee"),
                         rs.getBoolean("isMember"),
                         rs.getDate("dob").toLocalDate(),
-                        rs.getTimestamp("joining").toLocalDateTime()
+                        rs.getTimestamp("joinedAt").toLocalDateTime()
                 );
             }
         } catch (SQLException e) {
@@ -124,11 +124,13 @@ public class StudentDaoImpl implements StudentDao {
 
     @Override
     public List<Student> getAllStudents() {
+    	System.out.println("StudentDaoImpl.getAllStudents()");
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM Students";
         try (Connection con = ConnectionFactory.getMySqlConnection();
              Statement st = con.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
+        	System.out.println("StudentDaoImpl.getAllStudents() 2");
             while (rs.next()) {
                 students.add(new Student(
                         rs.getLong("id"),
@@ -136,11 +138,12 @@ public class StudentDaoImpl implements StudentDao {
                         rs.getLong("mobileNo"),
                         rs.getString("gender").charAt(0),
                         rs.getFloat("gradPerc"),
-                        rs.getDouble("salary"),
+                        rs.getDouble("fee"),
                         rs.getBoolean("isMember"),
                         rs.getDate("dob").toLocalDate(),
-                        rs.getTimestamp("joining").toLocalDateTime()
+                        rs.getTimestamp("joinedAt").toLocalDateTime()
                 ));
+                System.out.println(students);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -182,8 +185,6 @@ public class StudentDaoImpl implements StudentDao {
             e.printStackTrace();
         }
         return new String[0]; // Return an empty array if an error occurs
-    }
-
-    
+    }    
     
 }
